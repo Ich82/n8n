@@ -43,7 +43,7 @@
     },
     {
       "parameters": {
-        "url": "=https://serpapi.com/search.json?engine=google_jobs&q={{encodeURIComponent('Telefonakquise OR Opener OR Setter OR Neukundenakquise OR Telefonist OR Call Agent OR Telefonvertrieb OR Telefonischer Vertrieb OR Telefonischer Verkäufer OR Outbound Agent OR Outbound Caller OR Telesales Agent OR Akquise Agent OR Inside Sales Agent OR Vertriebsmitarbeiter remote')}}&location=Germany&hl=de&gl=de&api_key=21b6b7006dd5114c7137169fcb03dc1cc0bb801d2cb1a2e38bae69e690b030cc",
+        "url": "=https://serpapi.com/search.json?engine=google_jobs&q={{encodeURIComponent('(Telefonakquise OR Opener OR Setter OR Neukundenakquise OR Telefonist OR Call Agent OR Telefonvertrieb OR Telefonischer Vertrieb OR Telefonischer Verkäufer OR Outbound Agent OR Outbound Caller OR Telesales Agent OR Akquise Agent OR Inside Sales Agent OR Vertriebsmitarbeiter) (remote OR homeoffice)')}}&location=DACH&hl=de&gl=de&num=100&api_key=21b6b7006dd5114c7137169fcb03dc1cc0bb801d2cb1a2e38bae69e690b030cc",
         "options": {}
       },
       "id": "0406bad5-9845-41da-bacf-dcae27ab4584",
@@ -173,7 +173,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// In Node \"Kontaktsuche vorbereiten\" (Code angepasst)\nconst allJobs = $input.all();\nconst results = [];\n\nfor (const item of allJobs) {\n  const job = item.json;\n\n  const company = job.company_name || '';\n  const title = job.title || '';\n  const bestLinkForSheetAndDuplicates = job.link; // Nutzt den bereits erstellten Link\n\n  let searchQuery = '';\n  if (company) {\n    searchQuery = `\\\"${company}\\\" Kontakt Telefon Email Impressum`;\n  } else {\n    searchQuery = `\\\"${title}\\\" Kontakt Telefon Email`;\n  }\n\n  const jobDataForOutput = {\n    ...job, \n    link: bestLinkForSheetAndDuplicates, \n    searchQuery: searchQuery,\n    contactName: '', \n    contactTitle: '',\n    contactPhone: '',\n    contactEmail: ''\n  };\n  \n  results.push({ json: jobDataForOutput });\n}\n\nreturn results;"
+        "jsCode": "\"const allJobs = $input.all();\\nconst results = [];\\nconst seen = new Set();\\n\\nfor (const item of allJobs) {\\n  const job = item.json;\\n  const link = job.link;\\n  if (!link || seen.has(link)) continue;\\n  seen.add(link);\\n\\n  const text = `${job.title || ''} ${job.description || ''} ${job.location || ''}`.toLowerCase();\\n  if (!text.includes('remote') && !text.includes('homeoffice')) continue;\\n\\n  const company = job.company_name || '';\\n  const title = job.title || '';\\n\\n  let searchQuery = '';\\n  if (company) {\\n    searchQuery = `\\\\\\\"${company}\\\\\\\" Kontakt Telefon Email Impressum`;\\n  } else {\\n    searchQuery = `\\\\\\\"${title}\\\\\\\" Kontakt Telefon Email`;\\n  }\\n\\n  const jobDataForOutput = {\\n    ...job,\\n    link,\\n    searchQuery,\\n    contactName: '',\\n    contactTitle: '',\\n    contactPhone: '',\\n    contactEmail: ''\\n  };\\n\\n  results.push({ json: jobDataForOutput });\\n}\\n\\nreturn results;\\n\""
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
