@@ -1,0 +1,482 @@
+{
+  "name": "Beste Version",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "99c62634-3f15-4ead-a26f-85aa5128ff0b",
+      "name": "Täglicher Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "sheetId",
+              "value": "1RClo318b_-dUms223uzCZt8dGz_oyXMWILtr7kkUjM8"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0f667ec4-5e13-48ae-9f70-7cc32dbc8f30",
+      "name": "Set Google Sheet ID",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://serpapi.com/search.json?engine=google_jobs&q={{encodeURIComponent('Telefonakquise OR Opener OR Setter OR Neukundenakquise OR Telefonist OR Call Agent OR Telefonvertrieb OR Telefonischer Vertrieb OR Telefonischer Verkäufer OR Outbound Agent OR Outbound Caller OR Telesales Agent OR Akquise Agent OR Inside Sales Agent OR Vertriebsmitarbeiter remote')}}&location=Germany&hl=de&gl=de&api_key=21b6b7006dd5114c7137169fcb03dc1cc0bb801d2cb1a2e38bae69e690b030cc",
+        "options": {}
+      },
+      "id": "0406bad5-9845-41da-bacf-dcae27ab4584",
+      "name": "Jobs suchen (SerpAPI)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "jobs",
+              "value": "={{$json['jobs_results']}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5240fdd4-cdb2-4d43-af06-359a401fd6f8",
+      "name": "Jobs extrahieren",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        660,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "jobs",
+        "options": {}
+      },
+      "id": "fcea7eea-3af0-4349-9ff3-60cef2974e6d",
+      "name": "Jobs aufteilen",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 1,
+      "position": [
+        880,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "link",
+              "value": "={{ (function() { let rawLink = ''; const job = $json; if (job.apply_options && job.apply_options.length > 0 && job.apply_options[0] && job.apply_options[0].link) { rawLink = job.apply_options[0].link; } else if (job.share_link) { rawLink = job.share_link; } return rawLink ? rawLink.split('?')[0] : ''; })() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d406461c-fa78-43b9-a5e9-46b523bd6dcf",
+      "name": "Set Job Link (NEU)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "sheetId": "={{ $('Set Google Sheet ID').first().json.sheetId }}",
+        "range": "N8NCallAgents!B:B",
+        "options": {}
+      },
+      "id": "514da384-99dd-40a7-a97d-ad7b19fbd243",
+      "name": "Bestehende Jobs prüfen (GEÄNDERT: Read)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [
+        880,
+        200
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pcymmCpEjvW60LXT",
+          "name": "Ibrahim's Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "link",
+              "value": "={{ $json.values[0] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a76905c8-d5f0-4fdb-b8d0-7a483dfed473",
+      "name": "Set Existing Link Name (NEU)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "link",
+        "joinMode": "keepNonMatches",
+        "outputDataFrom": "input1",
+        "options": {}
+      },
+      "id": "48816f02-e988-45f5-bfff-f4e63a58d592",
+      "name": "Neue Jobs filtern (GEÄNDERT)",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        1320,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// In Node \"Kontaktsuche vorbereiten\" (Code angepasst)\nconst allJobs = $input.all();\nconst results = [];\n\nfor (const item of allJobs) {\n  const job = item.json;\n\n  const company = job.company_name || '';\n  const title = job.title || '';\n  const bestLinkForSheetAndDuplicates = job.link; // Nutzt den bereits erstellten Link\n\n  let searchQuery = '';\n  if (company) {\n    searchQuery = `\\\"${company}\\\" Kontakt Telefon Email Impressum`;\n  } else {\n    searchQuery = `\\\"${title}\\\" Kontakt Telefon Email`;\n  }\n\n  const jobDataForOutput = {\n    ...job, \n    link: bestLinkForSheetAndDuplicates, \n    searchQuery: searchQuery,\n    contactName: '', \n    contactTitle: '',\n    contactPhone: '',\n    contactEmail: ''\n  };\n  \n  results.push({ json: jobDataForOutput });\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        0
+      ],
+      "id": "fe2e872f-8566-4946-9f33-ae1b96bcd846",
+      "name": "Kontaktsuche vorbereiten"
+    },
+    {
+      "parameters": {
+        "url": "=https://serpapi.com/search.json?q={{encodeURIComponent($json.searchQuery)}}&location=Germany&hl=de&gl=de&api_key=21b6b7006dd5114c7137169fcb03dc1cc0bb801d2cb1a2e38bae69e690b030cc",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "36dc3de1-1fb1-48ac-a466-0ed4efbc6384",
+      "name": "Kontaktdaten suchen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Neuer Code für Node \"Kontaktdaten extrahieren\"\nconst jobsWithSearchQueries = $('Kontaktsuche vorbereiten').all();\nconst searchResults = $input.all();\nconst results = [];\n\nfor (let i = 0; i < jobsWithSearchQueries.length; i++) {\n  const job = jobsWithSearchQueries[i].json; \n  const searchResult = searchResults[i] ? searchResults[i].json : {};\n\n  let contactName = '';\n  let contactTitle = '';\n  let contactPhone = '';\n  let contactEmail = '';\n\n  if (searchResult.organic_results) {\n    for (const result of searchResult.organic_results.slice(0, 5)) {\n      const snippet = result.snippet || '';\n      const titleText = result.title || ''; \n\n      const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})/g;\n      const emails = snippet.match(emailRegex) || titleText.match(emailRegex);\n      if (emails && !contactEmail) {\n        contactEmail = emails[0];\n      }\n\n      const phoneRegex = /(\\+49|0)[\\s\\-]?\\(?\\d{2,5}\\)?[\\s\\-]?\\d{3,}[\\s\\-]?\\d{2,}/g;\n      const phones = snippet.match(phoneRegex) || titleText.match(phoneRegex);\n      if (phones && !contactPhone) {\n        contactPhone = phones[0].replace(/[^\\d\\+]/g, '').replace(/^0/, '+49');\n      }\n\n      if (!contactName) {\n        const namePatterns = [\n          /Ansprechpartner[:\\s]+(\\w+\\s+\\w+)/i,\n          /Kontakt[:\\s]+(\\w+\\s+\\w+)/i,\n          /(Herr|Frau)\\s+(\\w+\\s+\\w+)/i\n        ];\n        for (const pattern of namePatterns) {\n          const match = snippet.match(pattern) || titleText.match(pattern);\n          if (match) {\n            contactName = match[1] || match[2];\n            contactTitle = match[0].includes('Herr') ? 'Herr' : (match[0].includes('Frau') ? 'Frau' : '');\n            break;\n          }\n        }\n      }\n    }\n  }\n\n  results.push({\n    json: {\n      title: job.title || '',                                 \n      link: job.link || '',                                    \n      source: job.via || job.source || '',                     \n      posted_at: job.detected_extensions && job.detected_extensions.posted_at ? job.detected_extensions.posted_at : '', \n      company_name: job.company_name || '',                    \n      contactName: contactName || '',                          \n      contactTitle: contactTitle || '',                        \n      contactPhone: contactPhone || '',                        \n      contactEmail: contactEmail || '',                        \n      description: job.description || ''                       \n    }\n  });\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        0
+      ],
+      "id": "189ea8d2-d32f-4849-b3cd-db2911316b60",
+      "name": "Kontaktdaten extrahieren"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "append",
+        "sheetId": "={{ $('Set Google Sheet ID').first().json.sheetId }}",
+        "range": "N8NCallAgents!A:K",
+        "options": {
+          "valueInputMode": "USER_ENTERED"
+        }
+      },
+      "id": "24681cb8-711e-4c7c-96d1-0baa9bef9019",
+      "name": "In Google Sheets speichern (GEÄNDERT: A1)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pcymmCpEjvW60LXT",
+          "name": "Ibrahim's Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Code für Node \"E-Mail Daten generieren\" (ohne exakte Startzeile)\nconst savedJobs = $input.all();\nconst jobCount = savedJobs.length;\n\nif (jobCount === 0) {\n  return [{ json: { jobsCount: 0, sheetRowLink: '', jobDetails: '', firstNewRowMessage: '' } }];\n}\n\nconst gid = '1864188942';\nconst sheetId = $('Set Google Sheet ID').first().json.sheetId;\n\nconst sheetLink = `https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=${gid}`;\nconst firstNewRowMessage = `Die neuen Jobs wurden hinzugefügt.`;\n\nlet jobDetails = 'Neue Jobstellen:\\n\\n';\nfor (let i = 0; i < Math.min(savedJobs.length, 10); i++) {\n  const job = savedJobs[i].json;\n  jobDetails += `${i + 1}. ${job.title || 'Kein Titel'}\\n`;\n  jobDetails += `   Firma: ${job.company_name || 'Nicht angegeben'}\\n`;\n\n  let contactInfoGenerated = '';\n  if (job.contactName) {\n    contactInfoGenerated += `   Kontakt: ${job.contactTitle || ''} ${job.contactName}\\n`;\n  } else {\n    contactInfoGenerated += `   Kontakt: Nicht gefunden\\n`;\n  }\n  if (job.contactPhone) {\n    contactInfoGenerated += `   Telefonnummer: ${job.contactPhone}\\n`;\n  }\n  if (job.contactEmail) {\n    contactInfoGenerated += `   Email: ${job.contactEmail}\\n`;\n  }\n  jobDetails += contactInfoGenerated;\n  jobDetails += `   Link: ${job.link || 'Kein Link'}\\n\\n`;\n}\n\nif (savedJobs.length > 10) {\n  jobDetails += `... und ${savedJobs.length - 10} weitere Stellen\\n`;\n}\n\nreturn [{\n  json: {\n    jobsCount: jobCount,\n    sheetRowLink: sheetLink,\n    jobDetails: jobDetails,\n    firstNewRowMessage: firstNewRowMessage\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2420,
+        0
+      ],
+      "id": "8047e90f-8f2a-4683-899f-fb0071e1ee3f",
+      "name": "E-Mail Daten generieren"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json['jobsCount']}}",
+              "operation": "larger"
+            }
+          ]
+        }
+      },
+      "id": "032d2ee7-8176-41b8-a666-92fabbb6f746",
+      "name": "Neue Jobs gefunden?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        2640,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "imo@xiller.com",
+        "toEmail": "198ibrahim@gmail.com",
+        "subject": "=📌 {{ $json.jobsCount }} neue Jobstellen gefunden – Telefonakquise/Opener",
+        "text": "=Hallo Ibrahim,\n\nEs wurden {{ $json.jobsCount }} neue Stellen für Telefonakquise/Opener gefunden!\n\n{{ $json.jobDetails }}\n{{ $json.firstNewRowMessage }}\nZur vollständigen Tabelle: {{ $json.sheetRowLink }}\n\nViel Erfolg bei der Bewerbung!\n\nBeste Grüße\nDein Job-Scraper Bot",
+        "html": "=",
+        "options": {}
+      },
+      "id": "49e04ad5-443c-48d8-b7d2-a9557b41053f",
+      "name": "Benachrichtigungs-Mail senden",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        2860,
+        0
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "XaxccAOjNC8mxwYe",
+          "name": "imo@xiller.com"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Täglicher Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Google Sheet ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Google Sheet ID": {
+      "main": [
+        [
+          {
+            "node": "Jobs suchen (SerpAPI)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Bestehende Jobs prüfen (GEÄNDERT: Read)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jobs suchen (SerpAPI)": {
+      "main": [
+        [
+          {
+            "node": "Jobs extrahieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jobs extrahieren": {
+      "main": [
+        [
+          {
+            "node": "Jobs aufteilen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jobs aufteilen": {
+      "main": [
+        [
+          {
+            "node": "Set Job Link (NEU)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Job Link (NEU)": {
+      "main": [
+        [
+          {
+            "node": "Neue Jobs filtern (GEÄNDERT)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bestehende Jobs prüfen (GEÄNDERT: Read)": {
+      "main": [
+        [
+          {
+            "node": "Set Existing Link Name (NEU)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Existing Link Name (NEU)": {
+      "main": [
+        [
+          {
+            "node": "Neue Jobs filtern (GEÄNDERT)",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Neue Jobs filtern (GEÄNDERT)": {
+      "main": [
+        [
+          {
+            "node": "Kontaktsuche vorbereiten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kontaktsuche vorbereiten": {
+      "main": [
+        [
+          {
+            "node": "Kontaktdaten suchen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kontaktdaten suchen": {
+      "main": [
+        [
+          {
+            "node": "Kontaktdaten extrahieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kontaktdaten extrahieren": {
+      "main": [
+        [
+          {
+            "node": "In Google Sheets speichern (GEÄNDERT: A1)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "In Google Sheets speichern (GEÄNDERT: A1)": {
+      "main": [
+        [
+          {
+            "node": "E-Mail Daten generieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E-Mail Daten generieren": {
+      "main": [
+        [
+          {
+            "node": "Neue Jobs gefunden?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Neue Jobs gefunden?": {
+      "main": [
+        [
+          {
+            "node": "Benachrichtigungs-Mail senden",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0fdd78f4-d065-4685-85ff-d552b60809e6",
+  "meta": {
+    "instanceId": "5275888ac3bbfbe35e84eb10425bd1370ef80801d4ccf1734512904a2321d339"
+  },
+  "id": "jrs2YCHaM3zDeiHr",
+  "tags": []
+}
