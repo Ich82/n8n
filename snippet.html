@@ -1,0 +1,422 @@
+<style>
+/* Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* === Globale Schriftregel === */
+body, html, * {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+/* Nur relevante Container auf Seite 1 */
+.calendars-service-menu-container,
+.cal_servicemenu_widgets--services {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+/* Tabs */
+.calendars-service-menu-container .calendars-service-menu-tab {
+  border: 1px solid #d1d1d1;
+  border-radius: 5px;
+  padding: 10px 20px;
+  margin-right: 10px;
+  color: #333;
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+.calendars-service-menu-container .calendars-selected-service-menu-tab {
+  background-color: #3d3d3d !important;
+  color: #fff !important;
+  border-color: #a85891 !important;
+}
+.calendars-service-menu-container .calendars-service-menu-tab:hover {
+  background-color: #3d3d3d !important;
+  color: #ffffff !important;
+}
+
+/* Service-Karten */
+.cal_servicemenu_widgets--services .appointment_widgets--revamp--service-event--card {
+  background-color: #fafafa !important;
+  border-radius: 20px !important;
+  box-shadow: 2px 5px 12px rgba(0, 0, 0, 0.1) !important;
+  padding: 30px !important;
+  margin-bottom: 20px !important;
+  border-top: 1px solid #3d3d3d !important;
+  transition: background-color 0.3s ease;
+}
+.cal_servicemenu_widgets--services .appointment_widgets--revamp--service-event--card .name {
+  color: #333;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif !important;
+}
+
+/* PINKER "BUCH"-BUTTON */
+.cal_servicemenu_widgets--services 
+.appointment_widgets--revamp--service-event--card 
+.calendars-service-action-container {
+  background-color: #3d3d3d !important;
+  color: #ffffff !important;
+  border-radius: 5px !important;
+  padding: 8px 16px !important;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.4 !important;
+  text-align: center;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  transition: background-color 0.3s ease;
+  font-family: 'Poppins', sans-serif !important;
+}
+.cal_servicemenu_widgets--services 
+.appointment_widgets--revamp--service-event--card 
+.calendars-service-action-container:hover {
+  background-color: #a85891 !important;
+}
+</style>
+
+<style>
+/* === Seite 2 Styles === */
+.select-staff-container {
+  color: #3d3d3d !important;
+  font-weight: 500 !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  transition: color 0.3s ease;
+  font-family: 'Poppins', sans-serif !important;
+}
+.select-staff-container:hover {
+  color: #a85891 !important;
+  text-decoration: underline !important;
+}
+
+/* Icon durch PNG ersetzen */
+#hourglass-img {
+  content: url('https://storage.googleapis.com/msgsndr/UFeZwU5X6PIJLwU2XO3k/media/6828e1ca8acc4a730bb75026.png') !important;
+  width: 18px !important;
+  height: 18px !important;
+  object-fit: contain !important;
+  display: inline-block;
+}
+
+/* Footer-Buttons entfernen blauen Hintergrund */
+.widgets-action-buttons,
+.service-menu-widget-action-container,
+.service-menu-widget-action-right-container,
+.continue-button-container {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* "Bestätigen"-Button */
+.continue-button-container a {
+  background-color: #3d3d3d !important;
+  color: #ffffff !important;
+  border-radius: 5px !important;
+  padding: 10px 20px !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none !important;
+  box-shadow: none !important;
+  transition: background-color 0.3s ease;
+  font-family: 'Poppins', sans-serif !important;
+}
+.continue-button-container a:hover {
+  background-color: #a85891 !important;
+}
+</style>
+
+<style>
+:root {
+  --appointment_widgets-primary-color: #3d3d3d !important;
+  --appointment_widgets-border-color: #3d3d3d !important;
+  --appointment_widgets-background-color: #fde9f3 !important;
+  --cal_servicemenu_widgets-primary-color: #3d3d3d !important;
+  --blue: #3d3d3d !important;
+}
+
+/* Aktiver Tag (ausgewählt) */
+.vdpCell.selectable.selected .vdpCellContent {
+  background-color: #3d3d3d !important;
+  color: #ffffff !important;
+  font-family: 'Poppins', sans-serif !important;
+}
+
+/* Hover-Effekt */
+.vdpCell.selectable:hover .vdpCellContent {
+  background-color: #e0a3cc !important;
+  color: #ffffff !important;
+  border-radius: 100% !important;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif !important;
+}
+
+/* Zeit-Buttons rechts */
+.widgets-date-timezone-wrapper .time-button,
+.widgets-date-timezone-wrapper button {
+  font-family: 'Poppins', sans-serif !important;
+}
+</style>
+
+
+<script>
+  function replaceBookText() {
+    const buttons = document.querySelectorAll('.calendars-service-action-container');
+    buttons.forEach(button => {
+      if (['Buch', 'Book', 'Reservieren'].includes(button.textContent.trim())) {
+        button.textContent = 'Auswählen';
+      }
+    });
+  }
+
+  // Direkt beim Laden prüfen
+  replaceBookText();
+
+  // Sobald sich DOM-Elemente verändern, erneut prüfen
+  const observer = new MutationObserver(() => {
+    replaceBookText();
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+</script>
+
+
+
+
+
+<style>
+/* === Zwischenseite: Mitarbeiter auswählen === */
+.any-staff-available-container .staff-overlay-container .avatar_img {
+  content: url('https://storage.googleapis.com/msgsndr/UFeZwU5X6PIJLwU2XO3k/media/6828f2d3a6cf151114668820.png') !important;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.any-staff-available-container .staff-overlay-container {
+  background-color: #fbeaf4 !important;
+  border-radius: 8px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.any-staff-available-container .select-staff-single-container-user-details,
+.any-staff-available-container .select-staff-text-container,
+.any-staff-available-container .select-staff-title,
+.any-staff-available-container .select-staff-desc {
+  background: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-family: 'Poppins', sans-serif !important;
+}
+
+.any-staff-available-container img[alt="tick"] {
+  content: url('https://storage.googleapis.com/msgsndr/UFeZwU5X6PIJLwU2XO3k/media/6828f33be5ca6c74acf2d788.png') !important;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+/* Light-Pink Ghost-Wrapper entfernen, Button bleibt bestehen */
+.any-staff-available-container > div:last-child {
+  background: transparent !important;
+  padding:    0           !important;
+}
+
+
+.select-staff-button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    background-color: #3d3d3d !important;
+    color: #fff !important;
+    border-radius: 5px !important;
+    padding: 6px 16px !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    font-family: 'Poppins', sans-serif !important;
+    cursor: pointer !important;
+    transition: background-color 0.3s ease !important;
+  }
+  .select-staff-button:hover {
+    background-color: #a85891 !important;
+  }
+
+  /* Label „Ausgewählt“: schwarzer Text auf zartem Rosa-Hintergrund */
+.custom-selected-text {
+  margin-left: 6px !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #101828 !important;  /* Schwarz */
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+  /* Tick-Icon in den Buttons pink einfärben */
+  .select-staff-button img[alt="tick"] {
+    content: url('https://storage.googleapis.com/msgsndr/UFeZwU5X6PIJLwU2XO3k/media/6828f33be5ca6c74acf2d788.png') !important;
+    width: 16px !important;
+    height: 16px !important;
+    object-fit: contain !important;
+  }
+  
+  /* Dynamische Anpassung beim Ausgewählt-Zustand */
+.select-staff-button img[alt="tick"] {
+  /* Wenn das Tick-Icon vorhanden ist, setzen wir per CSS-Variable: */
+  --bg: #fbeaf4;  /* leichter Rosa-Hintergrund */
+  --fg: #101828;  /* schwarzer Text */
+}
+
+/* Generischer Fallback: wende bg/fg an */
+.select-staff-button {
+  background-color: var(--bg, #3d3d3d) !important;
+  color: var(--fg, #ffffff) !important;
+}
+  
+ 
+</style>
+
+
+<script>
+(function() {
+  // Funktion, die Titel + Beschreibung in einem Container updatet
+  function update(container) {
+    const t = container.querySelector('.select-staff-title');
+    const d = container.querySelector('.select-staff-desc');
+    if (t) t.textContent = 'Egal welcher Therapeut';
+    if (d) d.textContent = 'Wählen Sie den frühstmöglichen Termin aus.';
+  }
+
+  // 1) Falls die Box schon da ist, direkt updaten
+  document.querySelectorAll('.any-staff-available-container')
+          .forEach(update);
+
+  // 2) Observer, der nur wartet, bis die Box hinzukommt, dann updatet und sich selbst stoppt
+  const obs = new MutationObserver((mutations, observer) => {
+    for (const m of mutations) {
+      for (const n of m.addedNodes) {
+        if (n.nodeType===1) {
+          // direktes Matching
+          if (n.matches('.any-staff-available-container')) {
+            update(n);
+            return observer.disconnect();
+          }
+          // oder als Kind-Element
+          const child = n.querySelector && n.querySelector('.any-staff-available-container');
+          if (child) {
+            update(child);
+            return observer.disconnect();
+          }
+        }
+      }
+    }
+  });
+  obs.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+
+<script>
+(function(){
+  // 1) Text-Ersetzung
+  function replaceStaffText() {
+    document.querySelectorAll('.select-staff-title').forEach(el => {
+      if (el.textContent.trim() !== 'Egal welcher Therapeut') {
+        el.textContent = 'Egal welcher Therapeut';
+      }
+    });
+    document.querySelectorAll('.select-staff-desc').forEach(el => {
+      if (el.textContent.trim() !== 'Wählen Sie den frühstmöglichen Termin aus.') {
+        el.textContent = 'Wählen Sie den frühstmöglichen Termin aus.';
+      }
+    });
+  }
+
+  // 2) Einmal initial ausführen
+  replaceStaffText();
+
+  // 3) Permanent beobachten: bei **jedem** DOM-Änderung feuert replaceStaffText() erneut
+  new MutationObserver(replaceStaffText)
+    .observe(document.body, {
+      childList: true,
+      subtree:   true
+    });
+})();
+</script>
+
+<style>
+  /* Button auf Inline-Flex, damit Icon + Text nebeneinander sitzen */
+  .select-staff-button {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+  }
+  
+/* === Is-selected Button: zartes Rosa Hintergrund + schwarzer Text + zentriert === */
+.select-staff-button.is-selected {
+  display:        inline-flex !important;
+  align-items:    center       !important;
+  justify-content:center       !important;
+  background-color: #fbeaf4   !important;
+  color:            #101828   !important;
+}
+.select-staff-button.is-selected:hover {
+  background-color: #e8d1db   !important;
+}
+
+
+
+  /* Unser Label */
+  .custom-selected-text {
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 14px;
+    font-weight: 500;
+    color: #101828;
+  }
+</style>
+
+<script>
+(function(){
+  // Funktion, die bei jedem Button prüft: Tick vorhanden → „Ausgewählt“ anhängen
+function updateButtons() {
+  document.querySelectorAll('.select-staff-button').forEach(btn => {
+    const tick  = btn.querySelector('img[alt="tick"]');
+    const label = btn.querySelector('.custom-selected-text');
+
+    // Label ein-/ausbauen
+    if (tick && !label) {
+      tick.insertAdjacentHTML('afterend',
+        '<span class="custom-selected-text">Ausgewählt</span>');
+    } else if (!tick && label) {
+      label.remove();
+    }
+
+    // Klasse fürs Button‐Styling setzen
+    if (tick)     btn.classList.add('is-selected');
+    else          btn.classList.remove('is-selected');
+  });
+}
+  // Einmal direkt nach Laden
+  updateButtons();
+
+  // Und immer bei DOM-Änderungen erneut
+  new MutationObserver(updateButtons)
+    .observe(document.body, { childList: true, subtree: true });
+})();
+
+
+</script>
